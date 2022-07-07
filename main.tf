@@ -21,11 +21,11 @@ resource "google_storage_bucket" "gross-data" {
   lifecycle_rule {
     condition {
       age = "60"
-      matches_storage_class = "STANDARD"
+      matches_storage_class = ["STANDARD"]
     }
     action {
       type = "SetStorageClass"
-      storage_class = "NEARLINE"
+      storage_class = ["NEARLINE"]
     }    
   }
   lifecycle_rule {
@@ -56,58 +56,6 @@ resource "google_pubsub_topic_iam_binding" "binding" {
   role    = "roles/pubsub.publisher"
   members = ["serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"]
 }
-
-resource "google_compute_network" "vpc-network" {
-  name                    = "vpc-network"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "us-central1-subnet" {
-  name          = "us-central1-subnet"
-  ip_cidr_range = "10.2.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.vpc-network.id
-}
-
-resource "google_sql_database_instance" "pnl-data" {
-  name             = "pnl-data"
-  database_version = "MYSQL_5_7"
-  region           = "us-central1"
-
-  settings {
-    tier = "db-f1-micro"
-    ip_configuration {
-      ipv4_enabled    = false
-      private_network = google_compute_network.vpc-network.id
-    }
-  }
-}
-
-resource "google_sql_database" "database" {
-  name     = "pnl-db"
-  instance = google_sql_database_instance.pnl-data.name
-}
-
-/*resource "google_compute_instance" "primeiravm" {
-  name         = "primeiravm"
-  machine_type = "e2-micro"
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-9"
-    }
-  }
-
-  network_interface {
-    network = google_compute_network.vpc_network.self_link
-
-    access_config {
-      // Ephemeral public IP
-    }
-  }
-
-  metadata_startup_script = "echo hi > /test.txt"
-}*/
 
 //terraform init - para iniciar o terraform na pasta
 //terraform plan

@@ -25,13 +25,13 @@ resource "google_storage_bucket" "gross-data" {
     }
     action {
       type = "SetStorageClass"
-      storage_class = ["NEARLINE"]
+      storage_class = "NEARLINE"
     }    
   }
   lifecycle_rule {
     condition {
       age = "365"
-      matches_storage_class = "NEARLINE"
+      matches_storage_class = ["NEARLINE"]
     }
     action {
       type = "SetStorageClass"
